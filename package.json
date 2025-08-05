@@ -14,7 +14,8 @@
     "pre:commit": "npm run lint && npm run typecheck && npm run build"
   },
   "dependencies": {
-    "drizzle-orm": "^0.32.1",
+    "dotenv": "^17.2.1",
+    "drizzle-orm": "^0.33.0",
     "next": "^14.2.19",
     "postgres": "^3.4.4",
     "react": "^18.3.1",
