@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import db from "../../../db";
 import { advocates } from "../../../db/schema";
-import { desc, and, gte, like, eq, sql } from "drizzle-orm";
+import { asc, desc, and, gte, ilike, eq, sql } from "drizzle-orm";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -11,18 +11,19 @@ export async function GET(request: NextRequest) {
   const degree = searchParams.get('degree');
   const specialties = searchParams.getAll('specialties');
   const yearsOfExperience = searchParams.get('yearsOfExperience');
-  const limit = Number(searchParams.get('limit')) || 10;
+  const limit = Number(searchParams.get('limit')) || 100;
   const offset = Number(searchParams.get('offset')) || 0;
+  const sortDirection = searchParams.get('sortDirection');
 
   const filters = [];
   if (firstName) {
-    filters.push(like(advocates.firstName, firstName))
+    filters.push(ilike(advocates.firstName, `%${firstName}%`))
   }
   if (lastName) {
-    filters.push(like(advocates.lastName, lastName))
+    filters.push(ilike(advocates.lastName, `%${lastName}%`))
   }
   if (city) {
-    filters.push(like(advocates.city, city))
+    filters.push(ilike(advocates.city, `%${city}%`))
   }
   if (degree) {
     filters.push(eq(advocates.degree, degree))
@@ -39,8 +40,8 @@ export async function GET(request: NextRequest) {
     select()
     .from(advocates)
     .where(and(...filters))
-    .orderBy(desc(advocates.yearsOfExperience))
-    .limit(limit)
+    .orderBy(sortDirection === 'asc' ? asc(advocates.firstName) : desc(advocates.firstName))
+    // .limit(limit)
     .offset(offset);
 
   return Response.json({ data });

@@ -27,6 +27,7 @@ import {
 import { Button } from "./components/ui/button";
 import { specialties } from "@/db/seed/advocates";
 import { Badge } from "./components/ui/badge";
+import formatPhone from "./util/formatPhone";
 
 enum Degree {
   "MSW" = "MSW",
@@ -52,6 +53,7 @@ interface AdvocateRequestParams {
   yearsOfExperience: Number;
   degree: string;
   specialties: string[];
+  sortDirection: string;
 }
 
 const fetchAdvocates = async (
@@ -64,6 +66,7 @@ const fetchAdvocates = async (
     city: advocateRequestParams.city,
     degree: advocateRequestParams.degree,
     yearsOfExperience: advocateRequestParams.yearsOfExperience.toString(),
+    sortDirection: advocateRequestParams.sortDirection,
   });
   for (const specialty of advocateRequestParams.specialties) {
     searchParams.append("specialties", specialty);
@@ -81,6 +84,7 @@ const getInitialFilter = (): AdvocateRequestParams => ({
   degree: "",
   specialties: [],
   yearsOfExperience: 0,
+  sortDirection: "desc",
 });
 
 export default function Home() {
@@ -255,6 +259,16 @@ export default function Home() {
             <p className="text-muted-foreground">
               Featured advocates are listed first
             </p>
+
+            <Button
+              onClick={(e) => {
+                handleFilterChange({
+                  ...filter,
+                  sortDirection:
+                    filter.sortDirection === "asc" ? "desc" : "asc",
+                });
+              }}
+            >{`Sort Direction: ${filter.sortDirection}`}</Button>
           </div>
 
           {/* Results Grid */}
@@ -289,10 +303,9 @@ export default function Home() {
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="">
                     <p className="text-sm text-muted-foreground">
-                      Lorem ipsum advocate short bio. Phone:{" "}
-                      {advocate.phoneNumber}
+                      Phone: {formatPhone(advocate.phoneNumber)}
                     </p>
 
                     <div className="space-y-2">
@@ -323,6 +336,12 @@ export default function Home() {
                             key={index}
                             variant="outline"
                             className="text-xs"
+                            onClick={(e) => {
+                              handleFilterChange({
+                                ...filter,
+                                specialties: [...advocate.specialties, cert],
+                              });
+                            }}
                           >
                             {cert}
                           </Badge>
@@ -330,12 +349,12 @@ export default function Home() {
                       </div>
                     </div>
 
-                    <div className="pt-2">
+                    <div className="mt-auto pt-2">
                       <Button
                         className="w-full"
                         variant={featured ? "featured" : "default"}
                       >
-                        View Profile
+                        Select
                       </Button>
                     </div>
                   </CardContent>
